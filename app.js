@@ -1,59 +1,54 @@
-// Data Initialization
-let issues = JSON.parse(localStorage.getItem("issues")) || [];
+const BASE_URL = "https://citysudhar-default-rtdb.asia-southeast1.firebasedatabase.app/"; 
+const DB_URL = `${BASE_URL}issues.json`;
 
-// 1. Function to display issues on the Main Page (Grid Layout)
 function displayIssues() {
     const issueListDiv = document.getElementById("issueList");
-    updateSummaryBar(issues);
-    
-    if(!issueListDiv) return;
+    if (!issueListDiv) return;
 
-    issueListDiv.innerHTML = "";
-
-    if (issues.length === 0) {
-        issueListDiv.innerHTML = "<p style='width:100%; text-align:center; padding: 40px; color: #64748b;'>No issues reported yet.</p>";
-        return;
-    }
-
-    issues.forEach(issue => {
-        const div = document.createElement("div");
-        div.className = "issue-card";
-        div.innerHTML = `
-            <div class="issue-time">${new Date(issue.createdAt).toLocaleDateString()}</div>
-            <h3 style="margin-top: 0; color: #1e293b;">${issue.title}</h3>
-            <p style="font-size: 0.9rem;"><b>Category:</b> ${issue.category}</p>
-            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 15px;">${issue.description}</p>
-            <p class="status ${issue.status.replace(/\s/g, '')}">Status: ${issue.status}</p>
-        `;
-        issueListDiv.appendChild(div);
-    });
+    fetch(DB_URL)
+        .then(response => response.json())
+        .then(data => {
+            const allIssues = data ? Object.entries(data).map(([id, val]) => ({ ...val, id })) : [];
+            const visibleIssues = allIssues.filter(issue => issue.status !== "Deleted").reverse();
+            
+            updateSummaryBar(visibleIssues);
+            
+            issueListDiv.innerHTML = "";
+            visibleIssues.forEach(issue => {
+                const card = document.createElement("div");
+                card.className = "issue-card";
+                card.innerHTML = `
+                    <div class="issue-time">${new Date(issue.createdAt).toLocaleDateString()}</div>
+                    <h3>${issue.title}</h3>
+                    <p style="font-size: 0.85rem; color: #2563eb; font-weight: 700;">By: ${issue.userName}</p>
+                    <p><b>Loc:</b> ${issue.location}</p>
+                    <p class="status ${issue.status.replace(/\s/g, '')}">${issue.status}</p>
+                `;
+                issueListDiv.appendChild(card);
+            });
+        });
 }
 
-// 2. Function to update the colored summary boxes
 function updateSummaryBar(issues) {
     const totalEl = document.getElementById("totalCount");
-    const pendingEl = document.getElementById("pendingCount");
-    const progressEl = document.getElementById("progressCount");
-    const resolvedEl = document.getElementById("resolvedCount");
-
-    if (totalEl) totalEl.textContent = issues.length;
-    if (pendingEl) pendingEl.textContent = issues.filter(i => i.status === "Pending").length;
-    if (progressEl) progressEl.textContent = issues.filter(i => i.status === "In Progress").length;
-    if (resolvedEl) resolvedEl.textContent = issues.filter(i => i.status === "Resolved").length;
+    if (totalEl) {
+        totalEl.innerText = issues.length;
+        document.getElementById("pendingCount").innerText = issues.filter(i => i.status === "Pending").length;
+        document.getElementById("progressCount").innerText = issues.filter(i => i.status === "In Progress").length;
+        document.getElementById("resolvedCount").innerText = issues.filter(i => i.status === "Resolved").length;
+    }
 }
 
-// 3. Form Submission Logic for report.html
 const form = document.getElementById("issueForm");
-const formContent = document.getElementById("formContent");
-const successMessage = document.getElementById("successMessage");
-
 if (form) {
     form.addEventListener("submit", function (e) {
         e.preventDefault();
+        const btn = document.getElementById("submitBtn");
+        btn.innerText = "Processing...";
+        btn.disabled = true;
 
-        // Create the new report object
-        const newIssue = {
-            id: Date.now(),
+        const issueData = {
+            userName: document.getElementById("userName").value,
             title: document.getElementById("title").value,
             category: document.getElementById("category").value,
             location: document.getElementById("location").value,
@@ -62,20 +57,31 @@ if (form) {
             createdAt: Date.now()
         };
 
-        // Save to Local Storage
-        issues.unshift(newIssue);
-        localStorage.setItem("issues", JSON.stringify(issues));
-
-        // Show Success UI
-        formContent.style.display = "none";
-        successMessage.style.display = "block";
-
-        // Auto Redirect after 3 seconds
-        setTimeout(() => {
-            window.location.href = "index.html";
-        }, 3000);
+        fetch(DB_URL, { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(issueData) 
+        })
+        .then(response => {
+            if(response.ok) {
+                document.getElementById("formContent").style.display = "none";
+                document.getElementById("successMessage").style.display = "block";
+                
+                // REDIRECT AFTER 5 SECONDS
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 5000);
+            } else {
+                alert("Database Error: Ensure Rules are set to public in Firebase console.");
+                btn.innerText = "Submit Report";
+                btn.disabled = false;
+            }
+        })
+        .catch(err => {
+            alert("Network Error: Could not connect to the cloud.");
+            btn.disabled = false;
+        });
     });
 }
 
-// Initialize display on page load
 displayIssues();
