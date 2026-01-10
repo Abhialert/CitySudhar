@@ -2,16 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard | CitySudhar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authority Portal | CitySudhar</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <header class="header-section">
-        <h1 class="brand-name">Authority Dashboard</h1>
-        <p class="tagline">AI-Prioritization Active</p>
-        <div class="top-buttons"><a href="index.html">Exit Portal</a></div>
+        <h1 class="brand-name">CitySudhar Authority Portal</h1>
+        <div class="top-buttons">
+            <a href="index.html" style="background: var(--secondary);">Return Home</a>
+        </div>
     </header>
-    <div id="adminIssueList"></div>
+
+    <div id="adminPortalContent" style="display: none;">
+        <div id="adminIssueList" style="max-width: 900px; margin: 20px auto; padding: 0 20px;"></div>
+    </div>
+
     <script src="admin.js"></script>
 </body>
 </html>
