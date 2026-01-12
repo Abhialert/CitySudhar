@@ -4,18 +4,30 @@ A community-driven platform where citizens can report local issues and authoriti
 
 ## Features
 - Citizen issue reporting (category, location, description)
-- Authority dashboard to update issue status
-- Status lifecycle: Pending → In Progress → Resolved
 - Live status visibility for citizens
+- 📌 Centralized issue reporting system
+-⏱️ Time-based tracking (“X hours ago”)
+-📊 Status summary (Pending, In Progress, Resolved)
+-👮 Authority dashboard with ID and Password for issue management
+-📱 Mobile-friendly and easy-to-use UI
+
+
 
 ## Tech Stack
 - HTML, CSS, JavaScript
-- Google Firebase Hosting (for deployment)
+- Google Firebase Real Time Database (for handling data)
 - Google Gemini (for issue summarization & prioritization – demo/concept)
 
 ## How to Run Locally
 Open `index.html` using a local server (VS Code Live Server recommended).
 
 ## Future Scope
-- Real-time sync
-- Authentication for authorities
+-User id and password login for authorities.
+-Personalised citizen profile.
+-Image based issue reporting and proof of resolving. 
+-Google maps integration.
+-Notifications before entering an issue zone.
+-Time limit based solution with alarming pending issues.
+-Issue escalation to higher authorities on crossing time limit.
+
+  
